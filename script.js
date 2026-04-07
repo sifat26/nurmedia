@@ -4,16 +4,16 @@
 
 // ===== PARTICLE SYSTEM =====
 function createParticles() {
-  const container = document.getElementById('particles');
+  const container = document.getElementById("particles");
   const count = 30;
 
   for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.classList.add('particle');
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-    p.style.animationDelay = (Math.random() * 10) + 's';
-    p.style.width = (Math.random() * 3 + 1) + 'px';
+    const p = document.createElement("div");
+    p.classList.add("particle");
+    p.style.left = Math.random() * 100 + "%";
+    p.style.animationDuration = Math.random() * 15 + 10 + "s";
+    p.style.animationDelay = Math.random() * 10 + "s";
+    p.style.width = Math.random() * 3 + 1 + "px";
     p.style.height = p.style.width;
     p.style.opacity = Math.random() * 0.5;
     container.appendChild(p);
@@ -21,33 +21,40 @@ function createParticles() {
 }
 
 // ===== NAVBAR SCROLL =====
-const navbar = document.getElementById('navbar');
-const navLinks = document.querySelectorAll('.nav-link');
+const navbar = document.getElementById("navbar");
+const navLinks = document.querySelectorAll(".nav-link");
 
-window.addEventListener('scroll', () => {
+window.addEventListener("scroll", () => {
   if (window.scrollY > 50) {
-    navbar.classList.add('scrolled');
+    navbar.classList.add("scrolled");
   } else {
-    navbar.classList.remove('scrolled');
+    navbar.classList.remove("scrolled");
   }
   updateActiveLink();
 });
 
 function updateActiveLink() {
-  const sections = ['home', 'about', 'services', 'media', 'contact'];
+  const sections = [
+    "home",
+    "about",
+    "services",
+    "media",
+    "community",
+    "contact",
+  ];
   const scrollPos = window.scrollY + 100;
 
-  sections.forEach(id => {
+  sections.forEach((id) => {
     const section = document.getElementById(id);
     if (!section) return;
     const top = section.offsetTop;
     const bottom = top + section.offsetHeight;
 
     if (scrollPos >= top && scrollPos < bottom) {
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === '#' + id) {
-          link.classList.add('active');
+      navLinks.forEach((link) => {
+        link.classList.remove("active");
+        if (link.getAttribute("href") === "#" + id) {
+          link.classList.add("active");
         }
       });
     }
@@ -55,39 +62,39 @@ function updateActiveLink() {
 }
 
 // ===== HAMBURGER MENU =====
-const hamburger = document.getElementById('hamburger');
-const navLinksContainer = document.getElementById('navLinks');
+const hamburger = document.getElementById("hamburger");
+const navLinksContainer = document.getElementById("navLinks");
 
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  navLinksContainer.classList.toggle('open');
+hamburger.addEventListener("click", () => {
+  hamburger.classList.toggle("open");
+  navLinksContainer.classList.toggle("open");
 });
 
-navLinksContainer.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    navLinksContainer.classList.remove('open');
+navLinksContainer.querySelectorAll("a").forEach((link) => {
+  link.addEventListener("click", () => {
+    hamburger.classList.remove("open");
+    navLinksContainer.classList.remove("open");
   });
 });
 
 // Close on outside click
-document.addEventListener('click', (e) => {
+document.addEventListener("click", (e) => {
   if (!hamburger.contains(e.target) && !navLinksContainer.contains(e.target)) {
-    hamburger.classList.remove('open');
-    navLinksContainer.classList.remove('open');
+    hamburger.classList.remove("open");
+    navLinksContainer.classList.remove("open");
   }
 });
 
 // ===== SMOOTH SCROLL =====
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
-    const hrefVal = this.getAttribute('href');
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+  anchor.addEventListener("click", function (e) {
+    const hrefVal = this.getAttribute("href");
     if (hrefVal.length > 1) {
       e.preventDefault();
       const target = document.querySelector(hrefVal);
       if (target) {
         const offsetTop = target.offsetTop - 80;
-        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        window.scrollTo({ top: offsetTop, behavior: "smooth" });
       }
     }
   });
@@ -96,27 +103,30 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // ===== INTERSECTION OBSERVER - FADE IN =====
 function initFadeIn() {
   const elements = document.querySelectorAll(
-    '.about-card, .service-card, .platform-card, .why-item, .contact-card, .section-header'
+    ".about-card, .service-card, .platform-card, .why-item, .contact-card, .section-header",
   );
 
-  elements.forEach(el => el.classList.add('fade-in'));
+  elements.forEach((el) => el.classList.add("fade-in"));
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.classList.add('visible');
-        }, i * 80);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add("visible");
+          }, i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
+  );
 
-  elements.forEach(el => observer.observe(el));
+  elements.forEach((el) => observer.observe(el));
 }
 
 // ===== COUNTER ANIMATION =====
-function animateCounter(el, target, suffix = '') {
+function animateCounter(el, target, suffix = "") {
   let current = 0;
   const increment = target / 60;
   const isFloat = target < 10;
@@ -130,7 +140,7 @@ function animateCounter(el, target, suffix = '') {
     if (isFloat) {
       el.textContent = current.toFixed(1) + suffix;
     } else {
-      el.textContent = Math.floor(current).toLocaleString('bn-BD') + suffix;
+      el.textContent = Math.floor(current).toLocaleString("bn-BD") + suffix;
     }
   }, 25);
 }
@@ -138,23 +148,28 @@ function animateCounter(el, target, suffix = '') {
 // Stats are already in Bengali numerals from HTML, no counter needed for static
 // But let's add a subtle scale animation on scroll
 function initStatsAnimation() {
-  const statsSection = document.querySelector('.hero-stats');
+  const statsSection = document.querySelector(".hero-stats");
   if (!statsSection) return;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.querySelectorAll('.stat-number').forEach((el, i) => {
-          setTimeout(() => {
-            el.style.transition = 'transform 0.5s ease, color 0.5s ease';
-            el.style.transform = 'scale(1.1)';
-            setTimeout(() => { el.style.transform = 'scale(1)'; }, 300);
-          }, i * 100);
-        });
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll(".stat-number").forEach((el, i) => {
+            setTimeout(() => {
+              el.style.transition = "transform 0.5s ease, color 0.5s ease";
+              el.style.transform = "scale(1.1)";
+              setTimeout(() => {
+                el.style.transform = "scale(1)";
+              }, 300);
+            }, i * 100);
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.5 },
+  );
 
   observer.observe(statsSection);
 }
@@ -216,9 +231,9 @@ function initStatsAnimation() {
 function handleSubmit(event) {
   event.preventDefault();
 
-  const btn = document.getElementById('submitBtn');
-  const successMsg = document.getElementById('formSuccess');
-  
+  const btn = document.getElementById("submitBtn");
+  const successMsg = document.getElementById("formSuccess");
+
   // Update button state
   const originalBtnText = btn.innerHTML;
   btn.disabled = true;
@@ -226,35 +241,38 @@ function handleSubmit(event) {
 
   // EmailJS integration
   // These IDs come from your EmailJS Dashboard
-  const serviceID = 'service_9jdagsa';
-  const templateID = 'template_v37pmi7';
+  const serviceID = "service_9jdagsa";
+  const templateID = "template_v37pmi7";
 
-  emailjs.sendForm(serviceID, templateID, event.target)
-    .then(() => {
+  emailjs.sendForm(serviceID, templateID, event.target).then(
+    () => {
       // Success
       btn.disabled = false;
       btn.innerHTML = originalBtnText;
       successMsg.style.display = "block";
       successMsg.style.color = "#4CAF50";
-      successMsg.innerHTML = "✅ আপনার বার্তা পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।";
-      
+      successMsg.innerHTML =
+        "✅ আপনার বার্তা পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।";
+
       // Reset form
       event.target.reset();
-      
+
       // Hide message after 5 seconds
       setTimeout(() => {
         successMsg.style.display = "none";
       }, 5000);
-    }, (err) => {
+    },
+    (err) => {
       // Error
       btn.disabled = false;
       btn.innerHTML = originalBtnText;
       alert("দুঃখিত, বার্তাটি পাঠানো যায়নি। আবার চেষ্টা করুন।");
       console.error("EmailJS Error:", err);
-    });
+    },
+  );
 }
 // ===== ADD SPIN ANIMATION =====
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.textContent = `
 @keyframes spin {
   from { transform: rotate(0deg); }
@@ -265,12 +283,12 @@ document.head.appendChild(style);
 
 // ===== CURSOR TRAIL ON HERO =====
 let lastTime = 0;
-document.querySelector('.hero').addEventListener('mousemove', (e) => {
+document.querySelector(".hero").addEventListener("mousemove", (e) => {
   const now = Date.now();
   if (now - lastTime < 60) return;
   lastTime = now;
 
-  const sparkle = document.createElement('div');
+  const sparkle = document.createElement("div");
   sparkle.style.cssText = `
     position: fixed;
     left: ${e.clientX}px;
@@ -285,9 +303,9 @@ document.querySelector('.hero').addEventListener('mousemove', (e) => {
   `;
   document.body.appendChild(sparkle);
 
-  if (!document.getElementById('sparkStyle')) {
-    const ss = document.createElement('style');
-    ss.id = 'sparkStyle';
+  if (!document.getElementById("sparkStyle")) {
+    const ss = document.createElement("style");
+    ss.id = "sparkStyle";
     ss.textContent = `
       @keyframes sparkFade {
         0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
@@ -301,18 +319,45 @@ document.querySelector('.hero').addEventListener('mousemove', (e) => {
 });
 
 // ===== SERVICE CARD GLOW ON HOVER =====
-document.querySelectorAll('.service-card').forEach(card => {
-  card.addEventListener('mousemove', (e) => {
+document.querySelectorAll(".service-card").forEach((card) => {
+  card.addEventListener("mousemove", (e) => {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const glow = card.querySelector('.service-glow');
+    const glow = card.querySelector(".service-glow");
     if (glow) {
-      glow.style.left = (x - 100) + 'px';
-      glow.style.top = (y - 100) + 'px';
+      glow.style.left = x - 100 + "px";
+      glow.style.top = y - 100 + "px";
     }
   });
 });
+
+// ===== SHARE COMMUNITY SECTION =====
+const shareBtn = document.getElementById("shareCommunityBtn");
+if (shareBtn) {
+  shareBtn.addEventListener("click", async () => {
+    const shareData = {
+      title: "নুর মিডিয়া বল্লা",
+      text: "ইসলামিক কন্টেন্টের জন্য এই পেইজটি দেখে আসুন।",
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("লিংক কপি হয়েছে। আপনার বন্ধুদের সাথে শেয়ার করুন।");
+      } else {
+        alert(
+          "এই ডিভাইসে শেয়ার সুবিধা নেই। ব্রাউজারের URL কপি করে শেয়ার করুন।",
+        );
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  });
+}
 
 // ===== TYPING EFFECT FOR HERO TAGLINE (Optional Enhancement) =====
 function initTypingEffect() {
@@ -320,7 +365,7 @@ function initTypingEffect() {
 }
 
 // ===== INIT =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   createParticles();
   initFadeIn();
   initStatsAnimation();
@@ -328,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Announce loaded
 console.log(
-  '%c🌙 নুর মিডিয়া বল্লা %c Website Loaded',
-  'color: #c5a028; font-size:16px; font-weight: bold;',
-  'color: #4ec988; font-size:14px;'
+  "%c🌙 নুর মিডিয়া বল্লা %c Website Loaded",
+  "color: #c5a028; font-size:16px; font-weight: bold;",
+  "color: #4ec988; font-size:14px;",
 );
