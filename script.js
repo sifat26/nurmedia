@@ -160,60 +160,99 @@ function initStatsAnimation() {
 }
 
 // ===== CONTACT FORM =====
-function handleSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById('nameInput').value;
-  const phone = document.getElementById('phoneInput').value;
-  const service = document.getElementById('serviceSelect').value;
-  const message = document.getElementById('messageInput').value;
+// function handleSubmit(e) {
+//   e.preventDefault();
+//   const name = document.getElementById('nameInput').value;
+//   const phone = document.getElementById('phoneInput').value;
+//   const service = document.getElementById('serviceSelect').value;
+//   const message = document.getElementById('messageInput').value;
 
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
-      <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-    </svg>
-    পাঠানো হচ্ছে...
-  `;
+//   const submitBtn = document.getElementById('submitBtn');
+//   submitBtn.disabled = true;
+//   submitBtn.innerHTML = `
+//     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+//       <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+//     </svg>
+//     পাঠানো হচ্ছে...
+//   `;
 
-  // Build WhatsApp message
-  const serviceLabels = {
-    'islamic-media': 'ইসলামিক মিডিয়া',
-    'cc-camera': 'সিসি ক্যামেরা ইন্সটলেশন',
-    'projector': 'প্রজেক্টর ভাড়া',
-    'other': 'অন্যান্য'
-  };
+//   // Build WhatsApp message
+//   const serviceLabels = {
+//     'islamic-media': 'ইসলামিক মিডিয়া',
+//     'cc-camera': 'সিসি ক্যামেরা ইন্সটলেশন',
+//     'projector': 'প্রজেক্টর ভাড়া',
+//     'other': 'অন্যান্য'
+//   };
 
-  const waMessage = encodeURIComponent(
-    `নুর মিডিয়া বল্লা ওয়েবসাইট থেকে নতুন বার্তা:\n\n` +
-    `নাম: ${name}\n` +
-    `ফোন: ${phone}\n` +
-    `সেবা: ${serviceLabels[service] || service}\n` +
-    `বার্তা: ${message}`
-  );
+//   const waMessage = encodeURIComponent(
+//     `নুর মিডিয়া বল্লা ওয়েবসাইট থেকে নতুন বার্তা:\n\n` +
+//     `নাম: ${name}\n` +
+//     `ফোন: ${phone}\n` +
+//     `সেবা: ${serviceLabels[service] || service}\n` +
+//     `বার্তা: ${message}`
+//   );
 
-  setTimeout(() => {
-    // Show success
-    document.getElementById('formSuccess').style.display = 'block';
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-      </svg>
-      বার্তা পাঠান
-    `;
+//   setTimeout(() => {
+//     // Show success
+//     document.getElementById('formSuccess').style.display = 'block';
+//     submitBtn.disabled = false;
+//     submitBtn.innerHTML = `
+//       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//         <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+//       </svg>
+//       বার্তা পাঠান
+//     `;
 
-    // Redirect to WhatsApp
-    window.open(`https://wa.me/8801712908124?text=${waMessage}`, '_blank');
+//     // Redirect to WhatsApp
+//     window.open(`https://wa.me/8801712908124?text=${waMessage}`, '_blank');
 
-    // Reset form
-    e.target.reset();
-    setTimeout(() => {
-      document.getElementById('formSuccess').style.display = 'none';
-    }, 5000);
-  }, 1200);
+//     // Reset form
+//     e.target.reset();
+//     setTimeout(() => {
+//       document.getElementById('formSuccess').style.display = 'none';
+//     }, 5000);
+//   }, 1200);
+// }
+function handleSubmit(event) {
+  event.preventDefault();
+
+  const btn = document.getElementById('submitBtn');
+  const successMsg = document.getElementById('formSuccess');
+  
+  // Update button state
+  const originalBtnText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = "প্রেরণ করা হচ্ছে...";
+
+  // EmailJS integration
+  // These IDs come from your EmailJS Dashboard
+  const serviceID = 'service_9jdagsa';
+  const templateID = 'template_v37pmi7';
+
+  emailjs.sendForm(serviceID, templateID, event.target)
+    .then(() => {
+      // Success
+      btn.disabled = false;
+      btn.innerHTML = originalBtnText;
+      successMsg.style.display = "block";
+      successMsg.style.color = "#4CAF50";
+      successMsg.innerHTML = "✅ আপনার বার্তা পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।";
+      
+      // Reset form
+      event.target.reset();
+      
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        successMsg.style.display = "none";
+      }, 5000);
+    }, (err) => {
+      // Error
+      btn.disabled = false;
+      btn.innerHTML = originalBtnText;
+      alert("দুঃখিত, বার্তাটি পাঠানো যায়নি। আবার চেষ্টা করুন।");
+      console.error("EmailJS Error:", err);
+    });
 }
-
 // ===== ADD SPIN ANIMATION =====
 const style = document.createElement('style');
 style.textContent = `
