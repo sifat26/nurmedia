@@ -65,7 +65,8 @@ function callOpenRouter(message, language) {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
           "Content-Length": Buffer.byteLength(payload),
-          "HTTP-Referer": process.env.SITE_URL || "https://your-vercel-domain.vercel.app",
+          "HTTP-Referer":
+            process.env.SITE_URL || "https://your-vercel-domain.vercel.app",
           "X-Title": "Nur Media Chatbot",
         },
       },
@@ -77,14 +78,21 @@ function callOpenRouter(message, language) {
 
         response.on("end", () => {
           if (response.statusCode < 200 || response.statusCode >= 300) {
-            reject(new Error(`OpenRouter API error (${response.statusCode}): ${data}`));
+            reject(
+              new Error(
+                `OpenRouter API error (${response.statusCode}): ${data}`,
+              ),
+            );
             return;
           }
 
           try {
             const parsed = JSON.parse(data);
             const text =
-              parsed && parsed.choices && parsed.choices[0] && parsed.choices[0].message
+              parsed &&
+              parsed.choices &&
+              parsed.choices[0] &&
+              parsed.choices[0].message
                 ? parsed.choices[0].message.content
                 : "Sorry, no answer was generated.";
             resolve(text);
@@ -126,14 +134,16 @@ module.exports = async function handler(req, res) {
 
     if (msg.includes("Missing OPENROUTER_API_KEY")) {
       jsonResponse(res, 503, {
-        error: "Server is missing OPENROUTER_API_KEY. Add it in Vercel Environment Variables.",
+        error:
+          "Server is missing OPENROUTER_API_KEY. Add it in Vercel Environment Variables.",
       });
       return;
     }
 
     if (msg.includes("OpenRouter API error (401)")) {
       jsonResponse(res, 502, {
-        error: "OpenRouter rejected the API key. Please verify OPENROUTER_API_KEY in Vercel.",
+        error:
+          "OpenRouter rejected the API key. Please verify OPENROUTER_API_KEY in Vercel.",
       });
       return;
     }
