@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>নুর মিডিয়া বল্লা বাজার কালিহাতী টাংগাইল | বিশেষজ্ঞ সিসি ক্যামেরা ও ইসলামিক মিডিয়া সেবা</title>
-  <meta name="title" content="নুর মিডিয়া বল্লা বাজার কালিহাতী টাংগাইল | বিশেষজ্ঞ সিসি ক্যামেরা ও ইসলামিক মিডিয়া সেবা" />
+  <meta name="title"
+    content="নুর মিডিয়া বল্লা বাজার কালিহাতী টাংগাইল | বিশেষজ্ঞ সিসি ক্যামেরা ও ইসলামিক মিডিয়া সেবা" />
   <meta name="description"
     content="নুর মিডিয়া বল্লা - উন্নত সিসি ক্যামেরা ইন্সটলেশন, প্রজেক্টর ভাড়া এবং সঠিক মানহাজের ইসলামিক মিডিয়া প্রোডাকশন সেবা। বল্লা বাজার, টাঙ্গাইল।" />
   <meta name="keywords"
@@ -721,6 +722,45 @@
       </div>
     </div>
   </footer>
+
+  <!-- Nur Media Chatbot -->
+  <button class="chatbot-toggle" id="chatbotToggle" aria-label="Open Nur Media Assistant">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+    </svg>
+  </button>
+
+  <aside class="chatbot-widget" id="chatbotWidget" aria-live="polite" aria-label="Nur Media Assistant">
+    <div class="chatbot-header">
+      <div>
+        <h3>Nur Media Assistant</h3>
+        <p>Ask in English or Bangla</p>
+      </div>
+      <button class="chatbot-close" id="chatbotClose" aria-label="Close chatbot">×</button>
+    </div>
+
+    <div class="chatbot-lang" id="chatbotLang">
+      <button class="lang-btn active" data-lang="auto" type="button">Auto</button>
+      <button class="lang-btn" data-lang="en" type="button">English</button>
+      <button class="lang-btn" data-lang="bn" type="button">বাংলা</button>
+    </div>
+
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="chat-msg bot">
+        আসসালামু আলাইকুম! আমি নুর মিডিয়া সহকারী। নুর মিডিয়া সম্পর্কে বাংলা বা ইংরেজিতে প্রশ্ন করুন।
+      </div>
+    </div>
+
+    <div class="chatbot-quick" id="chatbotQuick">
+      <button type="button" class="quick-prompt">What services do you provide?</button>
+      <button type="button" class="quick-prompt">নুর মিডিয়ার ঠিকানা কোথায়?</button>
+    </div>
+
+    <form class="chatbot-input-wrap" id="chatbotForm">
+      <input id="chatbotInput" type="text" placeholder="Type your message..." autocomplete="off" required />
+      <button type="submit" id="chatbotSend">Send</button>
+    </form>
+  </aside>
 
   <!-- WhatsApp Float Button -->
   <a href="https://wa.me/8801712908124" target="_blank" class="whatsapp-float" id="whatsappFloat"

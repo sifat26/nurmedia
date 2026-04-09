@@ -364,11 +364,158 @@ function initTypingEffect() {
   // Already set, so we just animate sentence with highlight
 }
 
+// ===== CHATBOT =====
+function initChatbot() {
+  const chatbotToggle = document.getElementById("chatbotToggle");
+  const chatbotWidget = document.getElementById("chatbotWidget");
+  const chatbotClose = document.getElementById("chatbotClose");
+  const chatbotMessages = document.getElementById("chatbotMessages");
+  const chatbotForm = document.getElementById("chatbotForm");
+  const chatbotInput = document.getElementById("chatbotInput");
+  const chatbotSend = document.getElementById("chatbotSend");
+  const langSwitcher = document.getElementById("chatbotLang");
+  const quickPrompts = document.querySelectorAll(".quick-prompt");
+
+  if (
+    !chatbotToggle ||
+    !chatbotWidget ||
+    !chatbotClose ||
+    !chatbotMessages ||
+    !chatbotForm ||
+    !chatbotInput ||
+    !chatbotSend ||
+    !langSwitcher
+  ) {
+    return;
+  }
+
+  let language = "auto";
+
+  function isBanglaText(text) {
+    return /[\u0980-\u09FF]/.test(text);
+  }
+
+  function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = `chat-msg ${sender}`;
+    msg.textContent = text;
+    chatbotMessages.appendChild(msg);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    return msg;
+  }
+
+  function setSendingState(isSending) {
+    chatbotSend.disabled = isSending;
+    chatbotInput.disabled = isSending;
+    chatbotSend.textContent = isSending ? "..." : "Send";
+  }
+
+  function setLanguage(nextLanguage) {
+    language = nextLanguage;
+    langSwitcher.querySelectorAll(".lang-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.lang === nextLanguage);
+    });
+  }
+
+  async function sendToChatbot(messageText) {
+    addMessage(messageText, "user");
+
+    if (window.location.protocol === "file:") {
+      addMessage(
+        "Please open this website using the local server: http://localhost:3400 (not file:///).",
+        "bot",
+      );
+      return;
+    }
+
+    const typingNode = addMessage(
+      language === "bn" || (language === "auto" && isBanglaText(messageText))
+        ? "লিখছি..."
+        : "Typing...",
+      "bot",
+    );
+
+    setSendingState(true);
+
+    try {
+      const response = await fetch("/api/chatbot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: messageText,
+          language,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = `Request failed: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (_err) {
+          // Ignore JSON parse errors and keep the status-based message.
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      typingNode.textContent = data.reply || "No response received.";
+    } catch (error) {
+      console.error("Chatbot error:", error);
+      typingNode.textContent =
+        language === "bn" || (language === "auto" && isBanglaText(messageText))
+          ? `দুঃখিত, সমস্যা হয়েছে: ${error.message}`
+          : `Sorry, there was a problem: ${error.message}`;
+    } finally {
+      setSendingState(false);
+      chatbotInput.focus();
+    }
+  }
+
+  chatbotToggle.addEventListener("click", () => {
+    chatbotWidget.classList.toggle("open");
+    if (chatbotWidget.classList.contains("open")) {
+      chatbotInput.focus();
+    }
+  });
+
+  chatbotClose.addEventListener("click", () => {
+    chatbotWidget.classList.remove("open");
+  });
+
+  langSwitcher.addEventListener("click", (event) => {
+    const target = event.target.closest(".lang-btn");
+    if (!target) return;
+    setLanguage(target.dataset.lang || "auto");
+  });
+
+  chatbotForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const messageText = chatbotInput.value.trim();
+    if (!messageText) return;
+    chatbotInput.value = "";
+    await sendToChatbot(messageText);
+  });
+
+  quickPrompts.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const prompt = btn.textContent.trim();
+      if (!prompt) return;
+      await sendToChatbot(prompt);
+    });
+  });
+}
+
 // ===== INIT =====
 document.addEventListener("DOMContentLoaded", () => {
   createParticles();
   initFadeIn();
   initStatsAnimation();
+  initChatbot();
 });
 
 // Announce loaded
