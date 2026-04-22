@@ -511,8 +511,7 @@ function initPrayerTimes() {
     if (targetSec === null) {
       const fajrParsed = parseHourMinute(prayerTimings.Fajr);
       if (fajrParsed) {
-        targetSec =
-          24 * 3600 + fajrParsed.hour * 3600 + fajrParsed.minute * 60;
+        targetSec = 24 * 3600 + fajrParsed.hour * 3600 + fajrParsed.minute * 60;
       } else {
         targetSec = 24 * 3600;
       }
