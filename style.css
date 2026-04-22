@@ -1061,6 +1061,254 @@ body {
   color: #4ec988;
 }
 
+/* ===================== PRAYER TIMES ===================== */
+.prayer-times {
+  padding: 100px 0;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(197, 160, 40, 0.03) 45%,
+    rgba(26, 107, 60, 0.04) 100%
+  );
+  overflow: hidden;
+}
+
+.prayer-times::before {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  right: -220px;
+  top: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(197, 160, 40, 0.16), transparent 65%);
+  pointer-events: none;
+}
+
+.prayer-layout {
+  display: block;
+  align-items: start;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.prayer-content .section-title,
+.prayer-content .section-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.prayer-live-board {
+  margin-top: 22px;
+  background:
+    linear-gradient(150deg, rgba(18, 31, 22, 0.98), rgba(13, 25, 16, 0.98)),
+    radial-gradient(circle at 85% 8%, rgba(197, 160, 40, 0.13), transparent 40%);
+  border: 1px solid var(--border-green);
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.33);
+  backdrop-filter: blur(10px);
+}
+
+.prayer-board-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.prayer-board-head h3 {
+  font-size: 32px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.prayer-board-head p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.prayer-board-date {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prayer-board-date span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.prayer-board-date strong {
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--gold-light);
+  letter-spacing: -0.5px;
+}
+
+.prayer-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.prayer-time-card,
+.prayer-card-skeleton {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.prayer-card-skeleton {
+  min-height: 82px;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.prayer-time-card .prayer-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.prayer-time-card .prayer-time {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--gold-light);
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+}
+
+.prayer-next-card {
+  border-radius: 14px;
+  border: 1px solid rgba(197, 160, 40, 0.3);
+  background:
+    linear-gradient(160deg, rgba(10, 15, 13, 0.88), rgba(12, 30, 18, 0.88)),
+    radial-gradient(circle at 12% 16%, rgba(197, 160, 40, 0.3), transparent 45%),
+    radial-gradient(circle at 88% 84%, rgba(26, 107, 60, 0.35), transparent 45%);
+  padding: 14px;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.prayer-next-card .next-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.prayer-next-card h4 {
+  color: var(--text-primary);
+  font-size: 21px;
+}
+
+.next-countdown {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: 800;
+  font-family: "Inter", sans-serif;
+  letter-spacing: 1px;
+}
+
+.prayer-next-card span {
+  font-size: 14px;
+  color: var(--gold-light);
+}
+
+.prayer-board-meta {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.prayer-notes {
+  margin-top: 24px;
+  display: grid;
+  gap: 10px;
+}
+
+.prayer-notes p {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.prayer-widget-card {
+  background: linear-gradient(
+    165deg,
+    rgba(15, 26, 19, 0.98),
+    rgba(18, 31, 22, 0.98)
+  );
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.prayer-widget-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-green);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--gold-light);
+  font-family: "Inter", sans-serif;
+}
+
+.prayer-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  animation: prayerPulse 2s ease-in-out infinite;
+}
+
+@keyframes prayerPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.prayer-widget-frame {
+  width: 100%;
+  height: 358px;
+  border: 0;
+  background: #fff;
+  display: block;
+}
+
 /* ===================== COMMUNITY ===================== */
 .community {
   padding: 100px 0;
@@ -1871,6 +2119,10 @@ a.contact-value:hover {
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 1024px) {
+  .prayer-layout {
+    max-width: 100%;
+  }
+
   .footer-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1952,6 +2204,42 @@ a.contact-value:hover {
     flex-direction: column;
     text-align: center;
   }
+
+  .prayer-content .section-title,
+  .prayer-content .section-subtitle {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .prayer-board-head {
+    flex-direction: column;
+  }
+
+  .prayer-board-date {
+    text-align: left;
+  }
+
+  .prayer-cards {
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+  }
+
+  .prayer-live-board {
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .prayer-board-head h3 {
+    font-size: 26px;
+  }
+
+  .prayer-board-date strong {
+    font-size: 26px;
+  }
+
+  .next-countdown {
+    font-size: 38px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1981,6 +2269,30 @@ a.contact-value:hover {
   .community-growth-card,
   .community-quick-actions {
     padding: 22px;
+  }
+
+  .prayer-live-board {
+    padding: 18px;
+  }
+
+  .prayer-board-head h3 {
+    font-size: 23px;
+  }
+
+  .prayer-board-date strong {
+    font-size: 24px;
+  }
+
+  .prayer-time-card .prayer-time {
+    font-size: 27px;
+  }
+
+  .next-countdown {
+    font-size: 34px;
+  }
+
+  .prayer-widget-frame {
+    height: 342px;
   }
 }
 

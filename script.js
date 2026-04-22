@@ -39,6 +39,7 @@ function updateActiveLink() {
     "about",
     "services",
     "media",
+    "prayer-times",
     "community",
     "contact",
   ];
@@ -364,6 +365,203 @@ function initTypingEffect() {
   // Already set, so we just animate sentence with highlight
 }
 
+// ===== PRAYER TIMES + COUNTDOWN =====
+function initPrayerTimes() {
+  const locationText = document.getElementById("prayerLocationText");
+  const gregorianDateNode = document.getElementById("prayerGregorianDate");
+  const hijriDateNode = document.getElementById("prayerHijriDate");
+  const cardsNode = document.getElementById("prayerCards");
+  const nextNameNode = document.getElementById("prayerNextName");
+  const countdownNode = document.getElementById("prayerCountdown");
+  const nextTimeNode = document.getElementById("prayerNextTime");
+  const metaNode = document.getElementById("prayerBoardMeta");
+
+  if (
+    !locationText ||
+    !gregorianDateNode ||
+    !hijriDateNode ||
+    !cardsNode ||
+    !nextNameNode ||
+    !countdownNode ||
+    !nextTimeNode ||
+    !metaNode
+  ) {
+    return;
+  }
+
+  function parseHourMinute(value) {
+    const m = String(value || "").match(/(\d{1,2}):(\d{2})/);
+    if (!m) return null;
+    return { hour: Number(m[1]), minute: Number(m[2]) };
+  }
+
+  function to12Hour(hhmm) {
+    const parsed = parseHourMinute(hhmm);
+    if (!parsed) return "--:--";
+    const period = parsed.hour >= 12 ? "PM" : "AM";
+    const h12 = parsed.hour % 12 || 12;
+    return `${String(h12).padStart(2, "0")}:${String(parsed.minute).padStart(2, "0")} ${period}`;
+  }
+
+  function getDhakaNowParts() {
+    const formatter = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    const map = {};
+    formatter.formatToParts(new Date()).forEach((part) => {
+      if (part.type !== "literal") map[part.type] = part.value;
+    });
+
+    return {
+      year: Number(map.year),
+      month: Number(map.month),
+      day: Number(map.day),
+      hour: Number(map.hour),
+      minute: Number(map.minute),
+      second: Number(map.second),
+    };
+  }
+
+  function getDhakaDisplayDates() {
+    const now = new Date();
+    const longDate = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(now);
+
+    const dayName = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka",
+      weekday: "long",
+    }).format(now);
+
+    return {
+      dayName,
+      longDate,
+    };
+  }
+
+  function secondsToClock(totalSeconds) {
+    const safe = Math.max(0, totalSeconds);
+    const hh = Math.floor(safe / 3600);
+    const mm = Math.floor((safe % 3600) / 60);
+    const ss = safe % 60;
+    return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+  }
+
+  let prayerTimings = null;
+  let ticker = null;
+
+  function renderCards(timings) {
+    const order = [
+      ["Fajr", "Fajr"],
+      ["Sunrise", "Sunrise"],
+      ["Dhuhr", "Dhuhr"],
+      ["Asr", "Asr"],
+      ["Maghrib", "Maghrib"],
+      ["Isha", "Isha"],
+    ];
+
+    cardsNode.innerHTML = order
+      .map(([key, label]) => {
+        const time = timings[key] || "--:--";
+        return `
+          <div class="prayer-time-card">
+            <span class="prayer-name">${label}</span>
+            <span class="prayer-time">${to12Hour(time)}</span>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function updateCountdown() {
+    if (!prayerTimings) return;
+
+    const now = getDhakaNowParts();
+    const nowSec = now.hour * 3600 + now.minute * 60 + now.second;
+    const sequence = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+    let targetName = "Fajr";
+    let targetSec = null;
+    let targetTime = prayerTimings.Fajr || "--:--";
+
+    for (const name of sequence) {
+      const parsed = parseHourMinute(prayerTimings[name]);
+      if (!parsed) continue;
+      const sec = parsed.hour * 3600 + parsed.minute * 60;
+      if (sec > nowSec) {
+        targetName = name;
+        targetSec = sec;
+        targetTime = prayerTimings[name];
+        break;
+      }
+    }
+
+    // After Isha, move target to next day's Fajr.
+    if (targetSec === null) {
+      const fajrParsed = parseHourMinute(prayerTimings.Fajr);
+      if (fajrParsed) {
+        targetSec =
+          24 * 3600 + fajrParsed.hour * 3600 + fajrParsed.minute * 60;
+      } else {
+        targetSec = 24 * 3600;
+      }
+    }
+
+    const remaining = targetSec - nowSec;
+    nextNameNode.textContent = targetName;
+    nextTimeNode.textContent = to12Hour(targetTime);
+    countdownNode.textContent = secondsToClock(remaining);
+  }
+
+  async function loadPrayerTimes() {
+    try {
+      const response = await fetch("/api/prayer-times");
+      if (!response.ok) {
+        throw new Error(`Prayer API failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data || !data.timings) {
+        throw new Error("Invalid prayer data format");
+      }
+
+      prayerTimings = data.timings;
+      locationText.textContent = `${data.location || "Tangail, Bangladesh"} (${data.timezone || "Asia/Dhaka"})`;
+      const dhakaDates = getDhakaDisplayDates();
+      gregorianDateNode.textContent = dhakaDates.dayName;
+      hijriDateNode.textContent = dhakaDates.longDate;
+      metaNode.textContent = "Calculation: Muslim World League ";
+
+      renderCards(prayerTimings);
+      updateCountdown();
+
+      if (ticker) clearInterval(ticker);
+      ticker = setInterval(updateCountdown, 1000);
+    } catch (error) {
+      console.error("Prayer times error:", error);
+      cardsNode.innerHTML = "";
+      metaNode.textContent =
+        "Prayer times এখন লোড করা যাচ্ছে না। কিছুক্ষণ পর আবার চেষ্টা করুন।";
+      countdownNode.textContent = "--:--:--";
+      nextNameNode.textContent = "Unavailable";
+      nextTimeNode.textContent = "--:--";
+    }
+  }
+
+  loadPrayerTimes();
+}
+
 // ===== CHATBOT =====
 function initChatbot() {
   const chatbotToggle = document.getElementById("chatbotToggle");
@@ -515,6 +713,7 @@ document.addEventListener("DOMContentLoaded", () => {
   createParticles();
   initFadeIn();
   initStatsAnimation();
+  initPrayerTimes();
   initChatbot();
 });
 

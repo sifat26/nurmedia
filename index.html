@@ -62,6 +62,7 @@
         <li><a href="#about" class="nav-link">পরিচয়</a></li>
         <li><a href="#services" class="nav-link">সেবাসমূহ</a></li>
         <li><a href="#media" class="nav-link">মিডিয়া</a></li>
+        <li><a href="#prayer-times" class="nav-link">নামাজের সময়</a></li>
         <li><a href="#community" class="nav-link">কমিউনিটি</a></li>
         <li><a href="#contact" class="nav-link">যোগাযোগ</a></li>
       </ul>
@@ -422,6 +423,68 @@
           <span class="content-tag">ওজুর নিয়ম</span>
           <span class="content-tag">ইসলামিক শর্ট ক্লিপ</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prayer Times Section -->
+  <section class="prayer-times" id="prayer-times">
+    <div class="container">
+      <div class="prayer-layout">
+        <div class="prayer-content">
+          <span class="section-tag">নামাজের সময়সূচি</span>
+          <h2 class="section-title">টাঙ্গাইলের আজকের সালাত সময়</h2>
+          <p class="section-subtitle">
+            মুসলিম ওয়ার্ল্ড লীগ (MWL) ক্যালকুলেশন অনুযায়ী লাইভ প্রেয়ার টাইমস ও পরবর্তী নামাজের কাউন্টডাউন।
+          </p>
+
+          <div class="prayer-live-board" id="prayerLiveBoard" aria-live="polite">
+            <div class="prayer-board-head">
+              <div>
+                <h3>Prayer Times in Tangail</h3>
+                <p id="prayerLocationText">Loading location...</p>
+              </div>
+              <div class="prayer-board-date">
+                <span id="prayerGregorianDate">--</span>
+                <strong id="prayerHijriDate">--</strong>
+              </div>
+            </div>
+
+            <div class="prayer-cards" id="prayerCards">
+              <div class="prayer-card-skeleton"></div>
+              <div class="prayer-card-skeleton"></div>
+              <div class="prayer-card-skeleton"></div>
+            </div>
+
+            <div class="prayer-next-card" id="prayerNextCard">
+              <p class="next-label">Upcoming Prayer</p>
+              <h4 id="prayerNextName">--</h4>
+              <div class="next-countdown" id="prayerCountdown">--:--:--</div>
+              <span id="prayerNextTime">--:--</span>
+            </div>
+
+            <p class="prayer-board-meta" id="prayerBoardMeta">Calculating prayer schedule...</p>
+          </div>
+
+          <div class="prayer-notes">
+            <p>• লোকেশন: Tangail, Bangladesh</p>
+            <p>• Calculation: Muslim World League (Fixed)</p>
+            <p>• কাউন্টডাউন: পরবর্তী ফরজ নামাজ পর্যন্ত সময়</p>
+            <p>• সময় প্রতিদিন স্বয়ংক্রিয়ভাবে আপডেট হবে</p>
+          </div>
+        </div>
+
+        <!--
+        <div class="prayer-widget-card">
+          <div class="prayer-widget-top">
+            <span>Live Prayer Widget</span>
+            <span class="prayer-dot"></span>
+          </div>
+          <iframe id="iframe" title="prayerWidget" class="prayer-widget-frame" scrolling="no"
+            src="https://www.islamicfinder.org/prayer-widget/1336144/shafi/1/0/18.0/17.0"
+            loading="lazy"></iframe>
+        </div>
+        -->
       </div>
     </div>
   </section>
