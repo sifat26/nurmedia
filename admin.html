@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - নামাজের সময় ম্যানেজমেন্ট</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Hind Siliguri', 'Inter', sans-serif;
+        background: linear-gradient(
+          135deg,
+          #0a0f1c 0%,
+          #1a1f3a 50%,
+          #0d1117 100%
+        );
+        min-height: 100vh;
+        color: #e0e0e0;
+      }
+
+      .admin-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Login Screen */
+      .login-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .login-card {
+        background: rgba(26, 31, 58, 0.9);
+        border: 1px solid rgba(197, 160, 40, 0.3);
+        border-radius: 16px;
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+      }
+
+      .login-card h1 {
+        color: #c5a028;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+
+      .login-card p {
+        color: #888;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+      }
+
+      .login-card .logo-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-bottom: 16px;
+      }
+
+      /* Admin Panel */
+      .admin-panel {
+        display: none;
+        padding: 20px 0;
+      }
+
+      .admin-panel.active {
+        display: block;
+      }
+
+      .admin-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(26, 31, 58, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(197, 160, 40, 0.2);
+      }
+
+      .admin-header h1 {
+        color: #c5a028;
+        font-size: 1.3rem;
+      }
+
+      .admin-header .subtitle {
+        color: #888;
+        font-size: 0.85rem;
+      }
+
+      .logout-btn {
+        background: rgba(220, 53, 69, 0.2);
+        color: #ff6b6b;
+        border: 1px solid rgba(220, 53, 69, 0.4);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: rgba(220, 53, 69, 0.4);
+      }
+
+      /* Cards */
+      .admin-card {
+        background: rgba(26, 31, 58, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+      }
+
+      .admin-card h2 {
+        color: #c5a028;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .admin-card h2 .icon {
+        width: 24px;
+        height: 24px;
+        opacity: 0.8;
+      }
+
+      /* Toggle Switch */
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+
+      .toggle-label {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .toggle-label .title {
+        font-weight: 600;
+        color: #fff;
+        font-size: 0.95rem;
+      }
+
+      .toggle-label .desc {
+        color: #888;
+        font-size: 0.8rem;
+        margin-top: 2px;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 56px;
+        height: 28px;
+        cursor: pointer;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #333;
+        border-radius: 28px;
+        transition: 0.3s;
+      }
+
+      .toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        left: 3px;
+        bottom: 3px;
+        background: #fff;
+        border-radius: 50%;
+        transition: 0.3s;
+      }
+
+      .toggle-switch input:checked + .toggle-slider {
+        background: #c5a028;
+      }
+
+      .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(28px);
+      }
+
+      /* Mode Indicator */
+      .mode-indicator {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .mode-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .mode-badge.api {
+        background: rgba(40, 167, 69, 0.15);
+        color: #5cb85c;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+
+      .mode-badge.manual {
+        background: rgba(197, 160, 40, 0.15);
+        color: #c5a028;
+        border: 1px solid rgba(197, 160, 40, 0.3);
+      }
+
+      .mode-badge.active {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(197, 160, 40, 0.3);
+      }
+
+      .mode-badge.api.active {
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+      }
+
+      /* Input Form */
+      .prayer-form {
+        display: none;
+      }
+
+      .prayer-form.active {
+        display: block;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      @media (max-width: 500px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form-group label {
+        font-size: 0.85rem;
+        color: #aaa;
+        font-weight: 500;
+      }
+
+      .form-group input {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 12px 14px;
+        color: #fff;
+        font-size: 1rem;
+        font-family: 'Inter', monospace;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #c5a028;
+        box-shadow: 0 0 0 3px rgba(197, 160, 40, 0.1);
+      }
+
+      .form-group input::placeholder {
+        color: #555;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+        font-family: inherit;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #c5a028, #a88520);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(197, 160, 40, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(197, 160, 40, 0.4);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      /* Input Group */
+      .input-group {
+        position: relative;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding-right: 40px;
+      }
+
+      /* Status Messages */
+      .status-msg {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-size: 0.9rem;
+        display: none;
+      }
+
+      .status-msg.success {
+        display: block;
+        background: rgba(40, 167, 69, 0.15);
+        color: #5cb85c;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+
+      .status-msg.error {
+        display: block;
+        background: rgba(220, 53, 69, 0.15);
+        color: #ff6b6b;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+      }
+
+      /* Info Box */
+      .info-box {
+        background: rgba(52, 152, 219, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.3);
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 0.85rem;
+        color: #7ec8e3;
+        margin-top: 12px;
+        line-height: 1.6;
+      }
+
+      /* Current Settings Display */
+      .current-times {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      @media (max-width: 500px) {
+        .current-times {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .time-item {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+      }
+
+      .time-item .name {
+        font-size: 0.75rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .time-item .value {
+        font-size: 1.1rem;
+        color: #fff;
+        font-weight: 600;
+        margin-top: 4px;
+        font-family: 'Inter', monospace;
+      }
+
+      /* Last updated */
+      .last-updated {
+        color: #666;
+        font-size: 0.8rem;
+        margin-top: 12px;
+        text-align: right;
+      }
+
+      /* Loading spinner */
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Password Input */
+      .password-input-wrap {
+        position: relative;
+        margin-bottom: 16px;
+      }
+
+      .password-input-wrap input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 12px 14px;
+        color: #fff;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.3s;
+      }
+
+      .password-input-wrap input:focus {
+        outline: none;
+        border-color: #c5a028;
+      }
+
+      .login-error {
+        color: #ff6b6b;
+        font-size: 0.85rem;
+        margin-top: 8px;
+        display: none;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        .admin-header {
+          flex-direction: column;
+          gap: 12px;
+          text-align: center;
+        }
+
+        .mode-indicator {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+      <div class="login-card">
+        <img src="logo.png" alt="Logo" class="logo-img" />
+        <h1>Admin Panel</h1>
+        <p>নামাজের সময় ম্যানেজমেন্ট সিস্টেম</p>
+        <div class="password-input-wrap">
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Admin Password দিন..."
+            autocomplete="current-password"
+          />
+        </div>
+        <button
+          class="btn btn-primary"
+          style="width: 100%"
+          id="loginBtn"
+          onclick="handleLogin()"
+        >
+          লগইন করুন
+        </button>
+        <p class="login-error" id="loginError">
+          ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।
+        </p>
+      </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-container">
+      <div class="admin-panel" id="adminPanel">
+        <!-- Header -->
+        <div class="admin-header">
+          <div>
+            <h1>🕌 নামাজের সময় ম্যানেজমেন্ট</h1>
+            <p class="subtitle">Prayer Times Admin - Tangail</p>
+          </div>
+          <button class="logout-btn" onclick="handleLogout()">লগআউট</button>
+        </div>
+
+        <!-- Mode Toggle Card -->
+        <div class="admin-card">
+          <h2>
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+              />
+            </svg>
+            মোড সিলেক্ট করুন
+          </h2>
+
+          <div class="toggle-container">
+            <div class="toggle-label">
+              <span class="title">ম্যানুয়াল মোড চালু করুন</span>
+              <span class="desc"
+                >টগল ON করলে আপনার দেওয়া সময় দেখাবে, OFF করলে API থেকে
+                আসবে</span
+              >
+            </div>
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                id="modeToggle"
+                onchange="handleModeToggle()"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="mode-indicator">
+            <span class="mode-badge api" id="badgeApi">🌐 API Mode (Auto)</span>
+            <span class="mode-badge manual" id="badgeManual"
+              >✏️ Manual Mode (Admin)</span
+            >
+          </div>
+
+          <div class="info-box" id="modeInfo">
+            <strong>API Mode:</strong> Aladhan API থেকে স্বয়ংক্রিয়ভাবে নামাজের
+            সময় আসবে (Muslim World League calculation)।
+          </div>
+        </div>
+
+        <!-- Current Times Display -->
+        <div class="admin-card">
+          <h2>
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            বর্তমান নামাজের সময়
+          </h2>
+          <div class="current-times" id="currentTimes">
+            <div class="time-item">
+              <span class="name">Loading...</span
+              ><span class="value">--:--</span>
+            </div>
+          </div>
+          <p class="last-updated" id="lastUpdated"></p>
+        </div>
+
+        <!-- Manual Input Form -->
+        <div class="admin-card">
+          <h2>
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            নামাজের সময় সেট করুন (Manual)
+          </h2>
+
+          <div class="prayer-form active" id="prayerForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="timeFajr">ফজর (Fajr)</label>
+                <input type="time" id="timeFajr" value="04:30" />
+              </div>
+              <div class="form-group">
+                <label for="timeSunrise">সূর্যোদয় (Sunrise)</label>
+                <input type="time" id="timeSunrise" value="05:45" />
+              </div>
+              <div class="form-group">
+                <label for="timeDhuhr">যোহর (Dhuhr)</label>
+                <input type="time" id="timeDhuhr" value="12:00" />
+              </div>
+              <div class="form-group">
+                <label for="timeAsr">আসর (Asr)</label>
+                <input type="time" id="timeAsr" value="16:15" />
+              </div>
+              <div class="form-group">
+                <label for="timeMaghrib">মাগরিব (Maghrib)</label>
+                <input type="time" id="timeMaghrib" value="18:30" />
+              </div>
+              <div class="form-group">
+                <label for="timeIsha">এশা (Isha)</label>
+                <input type="time" id="timeIsha" value="19:45" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                class="btn btn-primary"
+                id="saveTimesBtn"
+                onclick="savePrayerTimes()"
+              >
+                সময় সেভ করুন
+              </button>
+              <button class="btn btn-secondary" onclick="loadCurrentSettings()">
+                রিফ্রেশ
+              </button>
+            </div>
+
+            <div class="status-msg" id="statusMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let adminPassword = '';
+
+      // ===== LOGIN =====
+      function handleLogin() {
+        const pwd = document.getElementById('loginPassword').value.trim();
+        if (!pwd) return;
+
+        adminPassword = pwd;
+
+        // Verify by trying to load settings
+        fetch('/api/admin/prayer-settings')
+          .then((r) => r.json())
+          .then((data) => {
+            // Password verified on save, for now just enter panel
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('active');
+            loadCurrentSettings();
+          })
+          .catch(() => {
+            document.getElementById('loginError').style.display = 'block';
+          });
+      }
+
+      // Enter key login
+      document
+        .getElementById('loginPassword')
+        .addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') handleLogin();
+        });
+
+      function handleLogout() {
+        adminPassword = '';
+        document.getElementById('adminPanel').classList.remove('active');
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('loginPassword').value = '';
+      }
+
+      // ===== LOAD SETTINGS =====
+      async function loadCurrentSettings() {
+        try {
+          const res = await fetch('/api/admin/prayer-settings');
+          const settings = await res.json();
+
+          // Update toggle
+          const toggle = document.getElementById('modeToggle');
+          toggle.checked = settings.mode === 'manual';
+          updateModeUI(settings.mode);
+
+          // Update form inputs
+          if (settings.manualTimes) {
+            document.getElementById('timeFajr').value =
+              settings.manualTimes.Fajr || '04:30';
+            document.getElementById('timeSunrise').value =
+              settings.manualTimes.Sunrise || '05:45';
+            document.getElementById('timeDhuhr').value =
+              settings.manualTimes.Dhuhr || '12:00';
+            document.getElementById('timeAsr').value =
+              settings.manualTimes.Asr || '16:15';
+            document.getElementById('timeMaghrib').value =
+              settings.manualTimes.Maghrib || '18:30';
+            document.getElementById('timeIsha').value =
+              settings.manualTimes.Isha || '19:45';
+          }
+
+          // Update current times display
+          renderCurrentTimes(settings);
+
+          // Last updated
+          if (settings.lastUpdated) {
+            const d = new Date(settings.lastUpdated);
+            document.getElementById('lastUpdated').textContent =
+              `সর্বশেষ আপডেট: ${d.toLocaleString('bn-BD')} (by ${settings.updatedBy})`;
+          }
+        } catch (err) {
+          console.error('Failed to load settings:', err);
+        }
+      }
+
+      function renderCurrentTimes(settings) {
+        const times = settings.manualTimes || {};
+        const container = document.getElementById('currentTimes');
+        const prayerNames = {
+          Fajr: 'ফজর',
+          Sunrise: 'সূর্যোদয়',
+          Dhuhr: 'যোহর',
+          Asr: 'আসর',
+          Maghrib: 'মাগরিব',
+          Isha: 'এশা',
+        };
+
+        container.innerHTML = Object.entries(prayerNames)
+          .map(([key, bnName]) => {
+            const time = times[key] || '--:--';
+            return `
+            <div class="time-item">
+              <span class="name">${bnName}</span>
+              <span class="value">${formatTime12h(time)}</span>
+            </div>
+          `;
+          })
+          .join('');
+      }
+
+      function formatTime12h(hhmm) {
+        if (!hhmm || hhmm === '--:--') return '--:--';
+        const [h, m] = hhmm.split(':').map(Number);
+        const period = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
+      }
+
+      // ===== MODE TOGGLE =====
+      function handleModeToggle() {
+        const toggle = document.getElementById('modeToggle');
+        const newMode = toggle.checked ? 'manual' : 'api';
+
+        updateModeUI(newMode);
+
+        // Save mode change
+        fetch('/api/admin/prayer-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: adminPassword, mode: newMode }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.error) {
+              showStatus('error', data.error);
+              toggle.checked = !toggle.checked;
+              updateModeUI(toggle.checked ? 'manual' : 'api');
+            } else {
+              showStatus(
+                'success',
+                `মোড পরিবর্তন হয়েছে: ${newMode === 'manual' ? 'ম্যানুয়াল' : 'API (Auto)'}`,
+              );
+              loadCurrentSettings();
+            }
+          })
+          .catch((err) => {
+            showStatus('error', 'মোড পরিবর্তন ব্যর্থ হয়েছে');
+            toggle.checked = !toggle.checked;
+            updateModeUI(toggle.checked ? 'manual' : 'api');
+          });
+      }
+
+      function updateModeUI(mode) {
+        const badgeApi = document.getElementById('badgeApi');
+        const badgeManual = document.getElementById('badgeManual');
+        const modeInfo = document.getElementById('modeInfo');
+        const saveBtn = document.getElementById('saveTimesBtn');
+        const formInputs = document.querySelectorAll('.form-grid input');
+
+        badgeApi.classList.toggle('active', mode === 'api');
+        badgeManual.classList.toggle('active', mode === 'manual');
+
+        if (mode === 'manual') {
+          modeInfo.innerHTML =
+            '<strong>Manual Mode:</strong> আপনার সেট করা নামাজের সময় ওয়েবসাইটে দেখাবে। নিচে সময় সেট করুন।';
+          saveBtn.disabled = false;
+          saveBtn.style.opacity = '1';
+          formInputs.forEach((input) => {
+            input.disabled = false;
+            input.style.opacity = '1';
+          });
+        } else {
+          modeInfo.innerHTML =
+            '<strong>API Mode:</strong> Aladhan API থেকে স্বয়ংক্রিয়ভাবে নামাজের সময় আসবে (Muslim World League calculation)।';
+          saveBtn.disabled = true;
+          saveBtn.style.opacity = '0.5';
+          formInputs.forEach((input) => {
+            input.disabled = true;
+            input.style.opacity = '0.5';
+          });
+        }
+      }
+
+      // ===== SAVE PRAYER TIMES =====
+      async function savePrayerTimes() {
+        const btn = document.getElementById('saveTimesBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
+
+        const manualTimes = {
+          Fajr: document.getElementById('timeFajr').value,
+          Sunrise: document.getElementById('timeSunrise').value,
+          Dhuhr: document.getElementById('timeDhuhr').value,
+          Asr: document.getElementById('timeAsr').value,
+          Maghrib: document.getElementById('timeMaghrib').value,
+          Isha: document.getElementById('timeIsha').value,
+        };
+
+        // Validate all times are filled
+        for (const [name, time] of Object.entries(manualTimes)) {
+          if (!time) {
+            showStatus('error', `${name} এর সময় দিন`);
+            btn.disabled = false;
+            btn.innerHTML = 'সময় সেভ করুন';
+            return;
+          }
+        }
+
+        try {
+          const res = await fetch('/api/admin/prayer-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              password: adminPassword,
+              manualTimes: manualTimes,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (data.error) {
+            showStatus('error', data.error);
+          } else {
+            showStatus('success', '✅ নামাজের সময় সফলভাবে সেভ হয়েছে!');
+            loadCurrentSettings();
+          }
+        } catch (err) {
+          showStatus('error', 'সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = 'সময় সেভ করুন';
+      }
+
+      // ===== STATUS MESSAGE =====
+      function showStatus(type, message) {
+        const el = document.getElementById('statusMsg');
+        el.className = `status-msg ${type}`;
+        el.textContent = message;
+        el.style.display = 'block';
+
+        setTimeout(() => {
+          el.style.display = 'none';
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

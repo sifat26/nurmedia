@@ -1,15 +1,39 @@
-const https = require("https");
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 function jsonResponse(res, statusCode, payload) {
   res.statusCode = statusCode;
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(payload));
+}
+
+function readPrayerSettings() {
+  try {
+    const filePath = path.join(__dirname, '..', 'data', 'prayer-settings.json');
+    const raw = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return {
+      mode: 'api',
+      manualTimes: {
+        Fajr: '04:30',
+        Sunrise: '05:45',
+        Dhuhr: '12:00',
+        Asr: '16:15',
+        Maghrib: '18:30',
+        Isha: '19:45',
+      },
+      lastUpdated: null,
+      updatedBy: 'system',
+    };
+  }
 }
 
 function fetchJsonWithRedirects(urlString, redirectCount = 0) {
   return new Promise((resolve, reject) => {
     if (redirectCount > 5) {
-      reject(new Error("Too many redirects from prayer API"));
+      reject(new Error('Too many redirects from prayer API'));
       return;
     }
 
@@ -18,9 +42,9 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
       {
         hostname: targetUrl.hostname,
         path: `${targetUrl.pathname}${targetUrl.search}`,
-        method: "GET",
+        method: 'GET',
         headers: {
-          "User-Agent": "NurMediaPrayerClient/1.0",
+          'User-Agent': 'NurMediaPrayerClient/1.0',
         },
       },
       (response) => {
@@ -29,7 +53,7 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
 
         if (
           [301, 302, 303, 307, 308].includes(statusCode) &&
-          typeof location === "string"
+          typeof location === 'string'
         ) {
           const nextUrl = new URL(location, targetUrl).toString();
           fetchJsonWithRedirects(nextUrl, redirectCount + 1)
@@ -38,12 +62,12 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
           return;
         }
 
-        let data = "";
-        response.on("data", (chunk) => {
+        let data = '';
+        response.on('data', (chunk) => {
           data += chunk;
         });
 
-        response.on("end", () => {
+        response.on('end', () => {
           if (statusCode < 200 || statusCode >= 300) {
             reject(new Error(`Prayer API error (${statusCode}): ${data}`));
             return;
@@ -58,7 +82,7 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
       },
     );
 
-    request.on("error", reject);
+    request.on('error', reject);
     request.end();
   });
 }
@@ -70,19 +94,36 @@ function fetchPrayerTimesByCity({ city, country, method, school }) {
   });
 }
 
-const FIXED_CITY = "Tangail";
-const FIXED_COUNTRY = "Bangladesh";
+const FIXED_CITY = 'Tangail';
+const FIXED_COUNTRY = 'Bangladesh';
 const FIXED_METHOD = 3; // Muslim World League
 const FIXED_SCHOOL = 0; // Shafi
 
 module.exports = async function handler(req, res) {
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
-    jsonResponse(res, 405, { error: "Method not allowed" });
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    jsonResponse(res, 405, { error: 'Method not allowed' });
     return;
   }
 
   try {
+    const settings = readPrayerSettings();
+
+    if (settings.mode === 'manual') {
+      jsonResponse(res, 200, {
+        location: `${FIXED_CITY}, ${FIXED_COUNTRY}`,
+        timezone: 'Asia/Dhaka',
+        gregorianDate: '',
+        hijriDate: '',
+        calculationMethod: 'Manual (Admin Set)',
+        schoolLabel: 'N/A',
+        mode: 'manual',
+        timings: settings.manualTimes,
+        lastUpdated: settings.lastUpdated,
+      });
+      return;
+    }
+
     const apiData = await fetchPrayerTimesByCity({
       city: FIXED_CITY,
       country: FIXED_COUNTRY,
@@ -96,11 +137,12 @@ module.exports = async function handler(req, res) {
 
     jsonResponse(res, 200, {
       location: `${FIXED_CITY}, ${FIXED_COUNTRY}`,
-      timezone: meta.timezone || "Asia/Dhaka",
-      gregorianDate: date?.gregorian?.date || "",
-      hijriDate: date?.hijri?.date || "",
-      calculationMethod: "Muslim World League",
-      schoolLabel: FIXED_SCHOOL === 1 ? "Hanafi" : "Shafi",
+      timezone: meta.timezone || 'Asia/Dhaka',
+      gregorianDate: date?.gregorian?.date || '',
+      hijriDate: date?.hijri?.date || '',
+      calculationMethod: 'Muslim World League',
+      schoolLabel: FIXED_SCHOOL === 1 ? 'Hanafi' : 'Shafi',
+      mode: 'api',
       timings: {
         Fajr: timings.Fajr,
         Sunrise: timings.Sunrise,
@@ -111,6 +153,6 @@ module.exports = async function handler(req, res) {
       },
     });
   } catch (_error) {
-    jsonResponse(res, 502, { error: "Failed to fetch prayer times" });
+    jsonResponse(res, 502, { error: 'Failed to fetch prayer times' });
   }
 };

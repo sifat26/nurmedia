@@ -1,26 +1,26 @@
-const http = require("http");
-const https = require("https");
-const fs = require("fs");
-const path = require("path");
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 3400);
 
 function loadEnvFile() {
-  const envPath = path.join(ROOT, ".env");
+  const envPath = path.join(ROOT, '.env');
   if (!fs.existsSync(envPath)) return;
 
-  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+  const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const idx = trimmed.indexOf("=");
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const idx = trimmed.indexOf('=');
     if (idx < 1) continue;
     const key = trimmed.slice(0, idx).trim();
     const value = trimmed
       .slice(idx + 1)
       .trim()
-      .replace(/^['"]|['"]$/g, "");
+      .replace(/^['"]|['"]$/g, '');
     if (!(key in process.env)) {
       process.env[key] = value;
     }
@@ -30,43 +30,43 @@ function loadEnvFile() {
 loadEnvFile();
 
 const mime = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css",
-  ".js": "text/javascript",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-  ".webp": "image/webp",
-  ".json": "application/json; charset=utf-8",
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css',
+  '.js': 'text/javascript',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.webp': 'image/webp',
+  '.json': 'application/json; charset=utf-8',
 };
 
 function readRequestBody(req, limitBytes = 64 * 1024) {
   return new Promise((resolve, reject) => {
-    let body = "";
+    let body = '';
 
-    req.on("data", (chunk) => {
+    req.on('data', (chunk) => {
       body += chunk;
       if (body.length > limitBytes) {
-        reject(new Error("Payload too large"));
+        reject(new Error('Payload too large'));
         req.destroy();
       }
     });
 
-    req.on("end", () => resolve(body));
-    req.on("error", reject);
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
   });
 }
 
 function jsonResponse(res, statusCode, payload) {
-  res.writeHead(statusCode, { "Content-Type": mime[".json"] });
+  res.writeHead(statusCode, { 'Content-Type': mime['.json'] });
   res.end(JSON.stringify(payload));
 }
 
 function fetchJsonWithRedirects(urlString, redirectCount = 0) {
   return new Promise((resolve, reject) => {
     if (redirectCount > 5) {
-      reject(new Error("Too many redirects from prayer API"));
+      reject(new Error('Too many redirects from prayer API'));
       return;
     }
 
@@ -75,9 +75,9 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
       {
         hostname: targetUrl.hostname,
         path: `${targetUrl.pathname}${targetUrl.search}`,
-        method: "GET",
+        method: 'GET',
         headers: {
-          "User-Agent": "NurMediaPrayerClient/1.0",
+          'User-Agent': 'NurMediaPrayerClient/1.0',
         },
       },
       (response) => {
@@ -86,7 +86,7 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
 
         if (
           [301, 302, 303, 307, 308].includes(statusCode) &&
-          typeof location === "string"
+          typeof location === 'string'
         ) {
           const nextUrl = new URL(location, targetUrl).toString();
           fetchJsonWithRedirects(nextUrl, redirectCount + 1)
@@ -95,12 +95,12 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
           return;
         }
 
-        let data = "";
-        response.on("data", (chunk) => {
+        let data = '';
+        response.on('data', (chunk) => {
           data += chunk;
         });
 
-        response.on("end", () => {
+        response.on('end', () => {
           if (statusCode < 200 || statusCode >= 300) {
             reject(new Error(`Prayer API error (${statusCode}): ${data}`));
             return;
@@ -115,7 +115,7 @@ function fetchJsonWithRedirects(urlString, redirectCount = 0) {
       },
     );
 
-    request.on("error", reject);
+    request.on('error', reject);
     request.end();
   });
 }
@@ -127,39 +127,79 @@ function fetchPrayerTimesByCity({ city, country, method, school }) {
   });
 }
 
-const FIXED_CITY = "Tangail";
-const FIXED_COUNTRY = "Bangladesh";
+const FIXED_CITY = 'Tangail';
+const FIXED_COUNTRY = 'Bangladesh';
 const FIXED_METHOD = 3; // Muslim World League
 const FIXED_SCHOOL = 0; // Shafi
+
+// ===== PRAYER SETTINGS DATABASE =====
+const PRAYER_SETTINGS_FILE = path.join(ROOT, 'data', 'prayer-settings.json');
+
+function readPrayerSettings() {
+  try {
+    const raw = fs.readFileSync(PRAYER_SETTINGS_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return {
+      mode: 'api',
+      manualTimes: {
+        Fajr: '04:30',
+        Sunrise: '05:45',
+        Dhuhr: '12:00',
+        Asr: '16:15',
+        Maghrib: '18:30',
+        Isha: '19:45',
+      },
+      lastUpdated: null,
+      updatedBy: 'system',
+    };
+  }
+}
+
+function writePrayerSettings(settings) {
+  const dir = path.dirname(PRAYER_SETTINGS_FILE);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(
+    PRAYER_SETTINGS_FILE,
+    JSON.stringify(settings, null, 2),
+    'utf8',
+  );
+}
+
+function validateTimeFormat(str) {
+  return /^\d{1,2}:\d{2}$/.test(str);
+}
 
 function callOpenRouter(message, language) {
   return new Promise((resolve, reject) => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      reject(new Error("Missing OPENROUTER_API_KEY"));
+      reject(new Error('Missing OPENROUTER_API_KEY'));
       return;
     }
 
     const languageInstruction =
-      language === "bn"
-        ? "Respond in Bangla."
-        : language === "en"
-          ? "Respond in English."
-          : "If the user writes in Bangla, respond in Bangla; otherwise respond in English.";
+      language === 'bn'
+        ? 'Respond in Bangla.'
+        : language === 'en'
+          ? 'Respond in English.'
+          : 'If the user writes in Bangla, respond in Bangla; otherwise respond in English.';
 
     const payload = JSON.stringify({
-      model: process.env.OPENROUTER_MODEL || "openrouter/auto",
+      model: process.env.OPENROUTER_MODEL || 'openrouter/auto',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "You are Nur Media Assistant for Nur Media Balla, Bangladesh. " +
-            "Answer only Nur Media related questions: services, social channels, contact, and mission. " +
-            "Known details: phone +8801712908124, email nurmediaballa23@gmail.com, location Mosjid Road, Balla Bazar, Bangladesh, services include Islamic media production, CC camera installation, and projector rental, channels include Facebook and YouTube @NurMediaBalla. " +
-            "If asked something unrelated to Nur Media, politely say you can help only with Nur Media information. " +
+            'You are Nur Media Assistant for Nur Media Balla, Bangladesh. ' +
+            'Answer only Nur Media related questions: services, social channels, contact, and mission. ' +
+            'Known details: phone +8801712908124, email nurmediaballa23@gmail.com, location Mosjid Road, Balla Bazar, Bangladesh, services include Islamic media production, CC camera installation, and projector rental, channels include Facebook and YouTube @NurMediaBalla. ' +
+            'If asked something unrelated to Nur Media, politely say you can help only with Nur Media information. ' +
             languageInstruction,
         },
-        { role: "user", content: message },
+        { role: 'user', content: message },
       ],
       temperature: 0.4,
       max_tokens: 400,
@@ -167,24 +207,24 @@ function callOpenRouter(message, language) {
 
     const request = https.request(
       {
-        hostname: "openrouter.ai",
-        path: "/api/v1/chat/completions",
-        method: "POST",
+        hostname: 'openrouter.ai',
+        path: '/api/v1/chat/completions',
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(payload),
-          "HTTP-Referer": process.env.SITE_URL || `http://localhost:${PORT}`,
-          "X-Title": "Nur Media Chatbot",
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+          'HTTP-Referer': process.env.SITE_URL || `http://localhost:${PORT}`,
+          'X-Title': 'Nur Media Chatbot',
         },
       },
       (response) => {
-        let data = "";
-        response.on("data", (chunk) => {
+        let data = '';
+        response.on('data', (chunk) => {
           data += chunk;
         });
 
-        response.on("end", () => {
+        response.on('end', () => {
           if (response.statusCode < 200 || response.statusCode >= 300) {
             reject(
               new Error(
@@ -198,7 +238,7 @@ function callOpenRouter(message, language) {
             const parsed = JSON.parse(data);
             const text =
               parsed?.choices?.[0]?.message?.content ||
-              "Sorry, no answer was generated.";
+              'Sorry, no answer was generated.';
             resolve(text);
           } catch (err) {
             reject(new Error(`Invalid OpenRouter response: ${err.message}`));
@@ -207,25 +247,25 @@ function callOpenRouter(message, language) {
       },
     );
 
-    request.on("error", reject);
+    request.on('error', reject);
     request.write(payload);
     request.end();
   });
 }
 
 const server = http.createServer(async (req, res) => {
-  const method = req.method || "GET";
-  const reqUrl = new URL(req.url || "/", `http://${req.headers.host}`);
+  const method = req.method || 'GET';
+  const reqUrl = new URL(req.url || '/', `http://${req.headers.host}`);
 
-  if (method === "POST" && reqUrl.pathname === "/api/chatbot") {
+  if (method === 'POST' && reqUrl.pathname === '/api/chatbot') {
     try {
       const rawBody = await readRequestBody(req);
-      const body = JSON.parse(rawBody || "{}");
-      const message = String(body.message || "").trim();
-      const language = String(body.language || "auto");
+      const body = JSON.parse(rawBody || '{}');
+      const message = String(body.message || '').trim();
+      const language = String(body.language || 'auto');
 
       if (!message) {
-        jsonResponse(res, 400, { error: "Message is required" });
+        jsonResponse(res, 400, { error: 'Message is required' });
         return;
       }
 
@@ -233,39 +273,58 @@ const server = http.createServer(async (req, res) => {
       jsonResponse(res, 200, { reply });
       return;
     } catch (error) {
-      console.error("/api/chatbot error:", error.message);
-      const message = String(error?.message || "");
+      console.error('/api/chatbot error:', error.message);
+      const message = String(error?.message || '');
 
-      if (message.includes("Missing OPENROUTER_API_KEY")) {
+      if (message.includes('Missing OPENROUTER_API_KEY')) {
         jsonResponse(res, 503, {
           error:
-            "Server is missing OPENROUTER_API_KEY. Create a .env file and add your OpenRouter key.",
+            'Server is missing OPENROUTER_API_KEY. Create a .env file and add your OpenRouter key.',
         });
         return;
       }
 
-      if (message.includes("OpenRouter API error (401)")) {
+      if (message.includes('OpenRouter API error (401)')) {
         jsonResponse(res, 502, {
           error:
-            "OpenRouter rejected the API key. Please check OPENROUTER_API_KEY.",
+            'OpenRouter rejected the API key. Please check OPENROUTER_API_KEY.',
         });
         return;
       }
 
       jsonResponse(res, 500, {
-        error: "Failed to generate chatbot response",
+        error: 'Failed to generate chatbot response',
       });
       return;
     }
   }
 
-  if (method === "GET" && reqUrl.pathname === "/api/health") {
+  if (method === 'GET' && reqUrl.pathname === '/api/health') {
     jsonResponse(res, 200, { ok: true });
     return;
   }
 
-  if (method === "GET" && reqUrl.pathname === "/api/prayer-times") {
+  if (method === 'GET' && reqUrl.pathname === '/api/prayer-times') {
     try {
+      const settings = readPrayerSettings();
+
+      if (settings.mode === 'manual') {
+        // Return manually set prayer times
+        jsonResponse(res, 200, {
+          location: `${FIXED_CITY}, ${FIXED_COUNTRY}`,
+          timezone: 'Asia/Dhaka',
+          gregorianDate: '',
+          hijriDate: '',
+          calculationMethod: 'Manual (Admin Set)',
+          schoolLabel: 'N/A',
+          mode: 'manual',
+          timings: settings.manualTimes,
+          lastUpdated: settings.lastUpdated,
+        });
+        return;
+      }
+
+      // Default: fetch from API
       const apiData = await fetchPrayerTimesByCity({
         city: FIXED_CITY,
         country: FIXED_COUNTRY,
@@ -279,11 +338,12 @@ const server = http.createServer(async (req, res) => {
 
       jsonResponse(res, 200, {
         location: `${FIXED_CITY}, ${FIXED_COUNTRY}`,
-        timezone: meta.timezone || "Asia/Dhaka",
-        gregorianDate: date?.gregorian?.date || "",
-        hijriDate: date?.hijri?.date || "",
-        calculationMethod: "Muslim World League",
-        schoolLabel: FIXED_SCHOOL === 1 ? "Hanafi" : "Shafi",
+        timezone: meta.timezone || 'Asia/Dhaka',
+        gregorianDate: date?.gregorian?.date || '',
+        hijriDate: date?.hijri?.date || '',
+        calculationMethod: 'Muslim World League',
+        schoolLabel: FIXED_SCHOOL === 1 ? 'Hanafi' : 'Shafi',
+        mode: 'api',
         timings: {
           Fajr: timings.Fajr,
           Sunrise: timings.Sunrise,
@@ -295,38 +355,100 @@ const server = http.createServer(async (req, res) => {
       });
       return;
     } catch (error) {
-      console.error("/api/prayer-times error:", error.message);
+      console.error('/api/prayer-times error:', error.message);
       jsonResponse(res, 502, {
-        error: "Failed to fetch prayer times",
+        error: 'Failed to fetch prayer times',
       });
       return;
     }
   }
 
+  // ===== ADMIN API ROUTES =====
+  if (method === 'GET' && reqUrl.pathname === '/api/admin/prayer-settings') {
+    const settings = readPrayerSettings();
+    jsonResponse(res, 200, settings);
+    return;
+  }
+
+  if (method === 'POST' && reqUrl.pathname === '/api/admin/prayer-settings') {
+    try {
+      const rawBody = await readRequestBody(req);
+      const data = JSON.parse(rawBody || '{}');
+      const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+      // Verify admin password
+      if (!data.password || data.password !== adminPassword) {
+        jsonResponse(res, 401, { error: 'Invalid admin password' });
+        return;
+      }
+
+      const settings = readPrayerSettings();
+
+      // Update mode
+      if (data.mode && (data.mode === 'api' || data.mode === 'manual')) {
+        settings.mode = data.mode;
+      }
+
+      // Update manual times
+      if (data.manualTimes && typeof data.manualTimes === 'object') {
+        const prayerNames = [
+          'Fajr',
+          'Sunrise',
+          'Dhuhr',
+          'Asr',
+          'Maghrib',
+          'Isha',
+        ];
+        for (const name of prayerNames) {
+          if (data.manualTimes[name]) {
+            if (!validateTimeFormat(data.manualTimes[name])) {
+              jsonResponse(res, 400, {
+                error: `Invalid time format for ${name}. Use HH:MM`,
+              });
+              return;
+            }
+            settings.manualTimes[name] = data.manualTimes[name];
+          }
+        }
+      }
+
+      settings.lastUpdated = new Date().toISOString();
+      settings.updatedBy = 'admin';
+
+      writePrayerSettings(settings);
+      jsonResponse(res, 200, { success: true, settings });
+      return;
+    } catch (error) {
+      console.error('/api/admin error:', error.message);
+      jsonResponse(res, 500, { error: 'Failed to update settings' });
+      return;
+    }
+  }
+
   const requestedPath =
-    reqUrl.pathname === "/" ? "/index.html" : reqUrl.pathname;
+    reqUrl.pathname === '/' ? '/index.html' : reqUrl.pathname;
   const safePath = path
     .normalize(requestedPath)
-    .replace(/^([.]{2}[\\/])+/, "")
-    .replace(/^[/\\]+/, "");
+    .replace(/^([.]{2}[\\/])+/, '')
+    .replace(/^[/\\]+/, '');
   const filePath = path.join(ROOT, safePath);
 
   if (!filePath.startsWith(ROOT)) {
     res.writeHead(403);
-    res.end("Forbidden");
+    res.end('Forbidden');
     return;
   }
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
-      res.end("Not found");
+      res.end('Not found');
       return;
     }
 
     const ext = path.extname(filePath).toLowerCase();
     res.writeHead(200, {
-      "Content-Type": mime[ext] || "application/octet-stream",
+      'Content-Type': mime[ext] || 'application/octet-stream',
     });
     res.end(data);
   });
@@ -338,8 +460,8 @@ function startServer(preferredPort) {
   });
 }
 
-server.on("error", (error) => {
-  if (error && error.code === "EADDRINUSE" && PORT !== 8080) {
+server.on('error', (error) => {
+  if (error && error.code === 'EADDRINUSE' && PORT !== 8080) {
     console.warn(`Port ${PORT} is busy. Falling back to http://localhost:8080`);
     startServer(8080);
     return;
