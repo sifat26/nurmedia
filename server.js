@@ -133,9 +133,17 @@ const FIXED_METHOD = 3; // Muslim World League
 const FIXED_SCHOOL = 0; // Shafi
 
 // ===== PRAYER SETTINGS DATABASE =====
+const {
+  readSettings: readPrayerSettingsCloud,
+  writeSettings: writePrayerSettingsCloud,
+} = require('./api/prayer-store');
 const PRAYER_SETTINGS_FILE = path.join(ROOT, 'data', 'prayer-settings.json');
 
-function readPrayerSettings() {
+// Use JSONBin if configured, otherwise fall back to local file
+async function readPrayerSettings() {
+  if (process.env.JSONBIN_BIN_ID && process.env.JSONBIN_API_KEY) {
+    return readPrayerSettingsCloud();
+  }
   try {
     const raw = fs.readFileSync(PRAYER_SETTINGS_FILE, 'utf8');
     return JSON.parse(raw);
@@ -156,7 +164,10 @@ function readPrayerSettings() {
   }
 }
 
-function writePrayerSettings(settings) {
+async function writePrayerSettings(settings) {
+  if (process.env.JSONBIN_BIN_ID && process.env.JSONBIN_API_KEY) {
+    return writePrayerSettingsCloud(settings);
+  }
   const dir = path.dirname(PRAYER_SETTINGS_FILE);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -306,7 +317,7 @@ const server = http.createServer(async (req, res) => {
 
   if (method === 'GET' && reqUrl.pathname === '/api/prayer-times') {
     try {
-      const settings = readPrayerSettings();
+      const settings = await readPrayerSettings();
 
       if (settings.mode === 'manual') {
         // Return manually set prayer times
@@ -365,8 +376,12 @@ const server = http.createServer(async (req, res) => {
 
   // ===== ADMIN API ROUTES =====
   if (method === 'GET' && reqUrl.pathname === '/api/admin/prayer-settings') {
-    const settings = readPrayerSettings();
-    jsonResponse(res, 200, settings);
+    try {
+      const settings = await readPrayerSettings();
+      jsonResponse(res, 200, settings);
+    } catch (err) {
+      jsonResponse(res, 500, { error: 'Failed to read settings' });
+    }
     return;
   }
 
@@ -382,7 +397,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const settings = readPrayerSettings();
+      const settings = await readPrayerSettings();
 
       // Update mode
       if (data.mode && (data.mode === 'api' || data.mode === 'manual')) {
@@ -415,7 +430,7 @@ const server = http.createServer(async (req, res) => {
       settings.lastUpdated = new Date().toISOString();
       settings.updatedBy = 'admin';
 
-      writePrayerSettings(settings);
+      await writePrayerSettings(settings);
       jsonResponse(res, 200, { success: true, settings });
       return;
     } catch (error) {

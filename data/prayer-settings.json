@@ -1,5 +1,5 @@
 {
-  "mode": "api",
+  "mode": "manual",
   "manualTimes": {
     "Fajr": "04:50",
     "Sunrise": "05:45",
@@ -8,6 +8,6 @@
     "Maghrib": "18:30",
     "Isha": "19:45"
   },
-  "lastUpdated": "2026-05-12T16:07:15.439Z",
+  "lastUpdated": "2026-05-12T16:22:27.062Z",
   "updatedBy": "admin"
 }

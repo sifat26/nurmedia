@@ -1,41 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-
-const DATA_FILE = path.join(__dirname, '..', 'data', 'prayer-settings.json');
+const { readSettings, writeSettings } = require('./prayer-store');
 
 function jsonResponse(res, statusCode, payload) {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(payload));
-}
-
-function readSettings() {
-  try {
-    const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return {
-      mode: 'api',
-      manualTimes: {
-        Fajr: '04:30',
-        Sunrise: '05:45',
-        Dhuhr: '12:00',
-        Asr: '16:15',
-        Maghrib: '18:30',
-        Isha: '19:45',
-      },
-      lastUpdated: null,
-      updatedBy: 'system',
-    };
-  }
-}
-
-function writeSettings(settings) {
-  const dir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(DATA_FILE, JSON.stringify(settings, null, 2), 'utf8');
 }
 
 function validateTime(str) {
@@ -47,8 +15,12 @@ module.exports = async function handler(req, res) {
 
   // GET - return current settings (no auth required for reading mode)
   if (req.method === 'GET') {
-    const settings = readSettings();
-    jsonResponse(res, 200, settings);
+    try {
+      const settings = await readSettings();
+      jsonResponse(res, 200, settings);
+    } catch (err) {
+      jsonResponse(res, 500, { error: 'Failed to read settings' });
+    }
     return;
   }
 
@@ -80,7 +52,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const settings = readSettings();
+    const settings = await readSettings();
 
     // Update mode if provided
     if (data.mode && (data.mode === 'api' || data.mode === 'manual')) {
@@ -113,7 +85,7 @@ module.exports = async function handler(req, res) {
     settings.lastUpdated = new Date().toISOString();
     settings.updatedBy = 'admin';
 
-    writeSettings(settings);
+    await writeSettings(settings);
     jsonResponse(res, 200, { success: true, settings });
     return;
   }

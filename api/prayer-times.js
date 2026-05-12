@@ -1,33 +1,10 @@
 const https = require('https');
-const fs = require('fs');
-const path = require('path');
+const { readSettings } = require('./prayer-store');
 
 function jsonResponse(res, statusCode, payload) {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(payload));
-}
-
-function readPrayerSettings() {
-  try {
-    const filePath = path.join(__dirname, '..', 'data', 'prayer-settings.json');
-    const raw = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return {
-      mode: 'api',
-      manualTimes: {
-        Fajr: '04:30',
-        Sunrise: '05:45',
-        Dhuhr: '12:00',
-        Asr: '16:15',
-        Maghrib: '18:30',
-        Isha: '19:45',
-      },
-      lastUpdated: null,
-      updatedBy: 'system',
-    };
-  }
 }
 
 function fetchJsonWithRedirects(urlString, redirectCount = 0) {
@@ -107,7 +84,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const settings = readPrayerSettings();
+    const settings = await readSettings();
 
     if (settings.mode === 'manual') {
       jsonResponse(res, 200, {
