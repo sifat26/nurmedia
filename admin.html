@@ -155,11 +155,14 @@
         background: rgba(0, 0, 0, 0.3);
         border-radius: 12px;
         margin-bottom: 16px;
+        gap: 16px;
       }
 
       .toggle-label {
         display: flex;
         flex-direction: column;
+        flex: 1;
+        min-width: 0;
       }
 
       .toggle-label .title {
@@ -177,8 +180,10 @@
       .toggle-switch {
         position: relative;
         width: 56px;
+        min-width: 56px;
         height: 28px;
         cursor: pointer;
+        flex-shrink: 0;
       }
 
       .toggle-switch input {
@@ -495,14 +500,172 @@
 
       /* Responsive */
       @media (max-width: 600px) {
+        .admin-container {
+          padding: 12px;
+        }
+
         .admin-header {
           flex-direction: column;
           gap: 12px;
           text-align: center;
+          padding: 16px;
+          margin-bottom: 20px;
+        }
+
+        .admin-header h1 {
+          font-size: 1.1rem;
+        }
+
+        .admin-card {
+          padding: 16px;
+          border-radius: 12px;
+          margin-bottom: 14px;
+        }
+
+        .admin-card h2 {
+          font-size: 1rem;
+          margin-bottom: 12px;
+        }
+
+        .toggle-container {
+          padding: 14px 16px;
+          gap: 12px;
+        }
+
+        .toggle-label .title {
+          font-size: 0.9rem;
+        }
+
+        .toggle-label .desc {
+          font-size: 0.75rem;
+          line-height: 1.4;
+        }
+
+        .toggle-switch {
+          min-width: 56px;
+          flex-shrink: 0;
         }
 
         .mode-indicator {
           flex-direction: column;
+          gap: 8px;
+        }
+
+        .mode-badge {
+          text-align: center;
+          padding: 10px 16px;
+          font-size: 0.85rem;
+        }
+
+        .info-box {
+          padding: 12px 14px;
+          font-size: 0.8rem;
+        }
+
+        .current-times {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+
+        .time-item {
+          padding: 10px 8px;
+        }
+
+        .time-item .name {
+          font-size: 0.7rem;
+        }
+
+        .time-item .value {
+          font-size: 1rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .form-group input {
+          padding: 14px 12px;
+          font-size: 1rem;
+          min-height: 48px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .form-actions .btn {
+          width: 100%;
+          min-height: 48px;
+          font-size: 1rem;
+        }
+
+        .logout-btn {
+          min-height: 40px;
+          padding: 8px 20px;
+        }
+
+        .status-msg {
+          font-size: 0.85rem;
+          padding: 10px 12px;
+        }
+
+        .last-updated {
+          font-size: 0.75rem;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .login-card {
+          padding: 28px 20px;
+        }
+
+        .login-card h1 {
+          font-size: 1.3rem;
+        }
+
+        .current-times {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 6px;
+        }
+
+        .admin-header h1 {
+          font-size: 1rem;
+        }
+      }
+
+      /* iOS safe area */
+      @supports (padding: env(safe-area-inset-bottom)) {
+        body {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      }
+
+      /* Better touch targets for mobile */
+      @media (pointer: coarse) {
+        .toggle-switch {
+          width: 60px;
+          height: 32px;
+        }
+
+        .toggle-slider::before {
+          width: 26px;
+          height: 26px;
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+          transform: translateX(28px);
+        }
+
+        .btn {
+          min-height: 48px;
+        }
+
+        .password-input-wrap input {
+          min-height: 48px;
+          font-size: 1rem;
         }
       }
     </style>
