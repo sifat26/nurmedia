@@ -313,6 +313,75 @@
         color: #555;
       }
 
+      /* Custom Time Picker */
+      .time-picker {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .time-picker select {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 12px 8px;
+        color: #fff;
+        font-size: 1rem;
+        font-family: 'Inter', monospace;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-align: center;
+        min-height: 48px;
+        cursor: pointer;
+        transition: border-color 0.3s;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        padding-right: 24px;
+      }
+
+      .time-picker select:focus {
+        outline: none;
+        border-color: #c5a028;
+        box-shadow: 0 0 0 3px rgba(197, 160, 40, 0.1);
+      }
+
+      .time-picker select:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .time-picker .time-sep {
+        color: #c5a028;
+        font-size: 1.2rem;
+        font-weight: 700;
+        user-select: none;
+      }
+
+      .time-picker .hour-select {
+        flex: 1;
+        min-width: 60px;
+      }
+
+      .time-picker .min-select {
+        flex: 1;
+        min-width: 60px;
+      }
+
+      .time-picker .period-select {
+        flex: 0.8;
+        min-width: 58px;
+        font-weight: 600;
+        color: #c5a028;
+      }
+
+      /* Fix select option colors for mobile */
+      .time-picker select option {
+        background: #1a1f3a;
+        color: #fff;
+      }
+
       /* Buttons */
       .btn {
         display: inline-flex;
@@ -590,6 +659,18 @@
           min-height: 48px;
         }
 
+        .time-picker {
+          gap: 4px;
+        }
+
+        .time-picker select {
+          padding: 12px 4px;
+          font-size: 0.95rem;
+          min-height: 48px;
+          padding-right: 20px;
+          background-position: right 4px center;
+        }
+
         .form-actions {
           flex-direction: column;
           gap: 10px;
@@ -803,28 +884,76 @@
           <div class="prayer-form active" id="prayerForm">
             <div class="form-grid">
               <div class="form-group">
-                <label for="timeFajr">ফজর (Fajr)</label>
-                <input type="time" id="timeFajr" value="04:30" />
+                <label>ফজর (Fajr)</label>
+                <div class="time-picker" data-prayer="Fajr">
+                  <select class="hour-select" aria-label="Hour"></select>
+                  <span class="time-sep">:</span>
+                  <select class="min-select" aria-label="Minute"></select>
+                  <select class="period-select" aria-label="AM/PM">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label for="timeSunrise">সূর্যোদয় (Sunrise)</label>
-                <input type="time" id="timeSunrise" value="05:45" />
+                <label>সূর্যোদয় (Sunrise)</label>
+                <div class="time-picker" data-prayer="Sunrise">
+                  <select class="hour-select" aria-label="Hour"></select>
+                  <span class="time-sep">:</span>
+                  <select class="min-select" aria-label="Minute"></select>
+                  <select class="period-select" aria-label="AM/PM">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label for="timeDhuhr">যোহর (Dhuhr)</label>
-                <input type="time" id="timeDhuhr" value="12:00" />
+                <label>যোহর (Dhuhr)</label>
+                <div class="time-picker" data-prayer="Dhuhr">
+                  <select class="hour-select" aria-label="Hour"></select>
+                  <span class="time-sep">:</span>
+                  <select class="min-select" aria-label="Minute"></select>
+                  <select class="period-select" aria-label="AM/PM">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label for="timeAsr">আসর (Asr)</label>
-                <input type="time" id="timeAsr" value="16:15" />
+                <label>আসর (Asr)</label>
+                <div class="time-picker" data-prayer="Asr">
+                  <select class="hour-select" aria-label="Hour"></select>
+                  <span class="time-sep">:</span>
+                  <select class="min-select" aria-label="Minute"></select>
+                  <select class="period-select" aria-label="AM/PM">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label for="timeMaghrib">মাগরিব (Maghrib)</label>
-                <input type="time" id="timeMaghrib" value="18:30" />
+                <label>মাগরিব (Maghrib)</label>
+                <div class="time-picker" data-prayer="Maghrib">
+                  <select class="hour-select" aria-label="Hour"></select>
+                  <span class="time-sep">:</span>
+                  <select class="min-select" aria-label="Minute"></select>
+                  <select class="period-select" aria-label="AM/PM">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label for="timeIsha">এশা (Isha)</label>
-                <input type="time" id="timeIsha" value="19:45" />
+                <label>এশা (Isha)</label>
+                <div class="time-picker" data-prayer="Isha">
+                  <select class="hour-select" aria-label="Hour"></select>
+                  <span class="time-sep">:</span>
+                  <select class="min-select" aria-label="Minute"></select>
+                  <select class="period-select" aria-label="AM/PM">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -849,6 +978,65 @@
 
     <script>
       let adminPassword = '';
+
+      // ===== INIT TIME PICKERS =====
+      function initTimePickers() {
+        document.querySelectorAll('.time-picker').forEach((picker) => {
+          const hourSel = picker.querySelector('.hour-select');
+          const minSel = picker.querySelector('.min-select');
+
+          // Populate hours 1-12
+          for (let h = 1; h <= 12; h++) {
+            const opt = document.createElement('option');
+            opt.value = h;
+            opt.textContent = String(h).padStart(2, '0');
+            hourSel.appendChild(opt);
+          }
+
+          // Populate minutes 00-59
+          for (let m = 0; m <= 59; m++) {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = String(m).padStart(2, '0');
+            minSel.appendChild(opt);
+          }
+        });
+      }
+
+      // Set a picker to 24h time value like "04:30" or "16:15"
+      function setPickerValue(prayerName, time24) {
+        const picker = document.querySelector(
+          `.time-picker[data-prayer="${prayerName}"]`,
+        );
+        if (!picker || !time24) return;
+
+        let [h, m] = time24.split(':').map(Number);
+        const period = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+
+        picker.querySelector('.hour-select').value = h12;
+        picker.querySelector('.min-select').value = m;
+        picker.querySelector('.period-select').value = period;
+      }
+
+      // Get 24h time value from a picker
+      function getPickerValue(prayerName) {
+        const picker = document.querySelector(
+          `.time-picker[data-prayer="${prayerName}"]`,
+        );
+        if (!picker) return '';
+
+        let h = parseInt(picker.querySelector('.hour-select').value);
+        const m = parseInt(picker.querySelector('.min-select').value);
+        const period = picker.querySelector('.period-select').value;
+
+        if (period === 'AM' && h === 12) h = 0;
+        if (period === 'PM' && h !== 12) h += 12;
+
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      }
+
+      initTimePickers();
 
       // ===== LOGIN =====
       function handleLogin() {
@@ -898,18 +1086,12 @@
 
           // Update form inputs
           if (settings.manualTimes) {
-            document.getElementById('timeFajr').value =
-              settings.manualTimes.Fajr || '04:30';
-            document.getElementById('timeSunrise').value =
-              settings.manualTimes.Sunrise || '05:45';
-            document.getElementById('timeDhuhr').value =
-              settings.manualTimes.Dhuhr || '12:00';
-            document.getElementById('timeAsr').value =
-              settings.manualTimes.Asr || '16:15';
-            document.getElementById('timeMaghrib').value =
-              settings.manualTimes.Maghrib || '18:30';
-            document.getElementById('timeIsha').value =
-              settings.manualTimes.Isha || '19:45';
+            setPickerValue('Fajr', settings.manualTimes.Fajr || '04:30');
+            setPickerValue('Sunrise', settings.manualTimes.Sunrise || '05:45');
+            setPickerValue('Dhuhr', settings.manualTimes.Dhuhr || '12:00');
+            setPickerValue('Asr', settings.manualTimes.Asr || '16:15');
+            setPickerValue('Maghrib', settings.manualTimes.Maghrib || '18:30');
+            setPickerValue('Isha', settings.manualTimes.Isha || '19:45');
           }
 
           // Update current times display
@@ -998,7 +1180,7 @@
         const badgeManual = document.getElementById('badgeManual');
         const modeInfo = document.getElementById('modeInfo');
         const saveBtn = document.getElementById('saveTimesBtn');
-        const formInputs = document.querySelectorAll('.form-grid input');
+        const formSelects = document.querySelectorAll('.form-grid select');
 
         badgeApi.classList.toggle('active', mode === 'api');
         badgeManual.classList.toggle('active', mode === 'manual');
@@ -1008,18 +1190,18 @@
             '<strong>Manual Mode:</strong> আপনার সেট করা নামাজের সময় ওয়েবসাইটে দেখাবে। নিচে সময় সেট করুন।';
           saveBtn.disabled = false;
           saveBtn.style.opacity = '1';
-          formInputs.forEach((input) => {
-            input.disabled = false;
-            input.style.opacity = '1';
+          formSelects.forEach((sel) => {
+            sel.disabled = false;
+            sel.style.opacity = '1';
           });
         } else {
           modeInfo.innerHTML =
             '<strong>API Mode:</strong> Aladhan API থেকে স্বয়ংক্রিয়ভাবে নামাজের সময় আসবে (Muslim World League calculation)।';
           saveBtn.disabled = true;
           saveBtn.style.opacity = '0.5';
-          formInputs.forEach((input) => {
-            input.disabled = true;
-            input.style.opacity = '0.5';
+          formSelects.forEach((sel) => {
+            sel.disabled = true;
+            sel.style.opacity = '0.5';
           });
         }
       }
@@ -1031,12 +1213,12 @@
         btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
 
         const manualTimes = {
-          Fajr: document.getElementById('timeFajr').value,
-          Sunrise: document.getElementById('timeSunrise').value,
-          Dhuhr: document.getElementById('timeDhuhr').value,
-          Asr: document.getElementById('timeAsr').value,
-          Maghrib: document.getElementById('timeMaghrib').value,
-          Isha: document.getElementById('timeIsha').value,
+          Fajr: getPickerValue('Fajr'),
+          Sunrise: getPickerValue('Sunrise'),
+          Dhuhr: getPickerValue('Dhuhr'),
+          Asr: getPickerValue('Asr'),
+          Maghrib: getPickerValue('Maghrib'),
+          Isha: getPickerValue('Isha'),
         };
 
         // Validate all times are filled
